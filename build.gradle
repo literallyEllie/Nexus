@@ -1,6 +1,6 @@
 // One has to compile Kotlin.
 buildscript {
-    ext.kotlin_version = "1.1.4-3"
+    ext.kotlin_version = "1.2.51"
     repositories {
         mavenCentral()
         jcenter()
@@ -37,7 +37,7 @@ dependencies {
     compile "com.zaxxer:HikariCP:3.1.0" // Connection pool
     compile "commons-io:commons-io:2.6" // Utility library
     compile "net.milkbowl.vault:VaultAPI:1.6" // Economy hook
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version" // Standard library
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version" // Standard library
     compile "org.slf4j:slf4j-nop:1.7.25" // Silent logger implementation.
     compileOnly "org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT" // Spigot.
 }
