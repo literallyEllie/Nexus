@@ -1,6 +1,5 @@
 package de.arraying.nexus.gui
 
-import de.arraying.nexus.Nexus
 import de.arraying.nexus.gui.slot.GUISlot
 import org.bukkit.Bukkit
 import org.bukkit.inventory.Inventory

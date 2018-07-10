@@ -21,7 +21,7 @@ import org.bukkit.command.CommandSender
 @Suppress("unused", "MemberVisibilityCanPrivate")
 class NexusCommandContext internal constructor(
         private val locale: NexusCommandLocalization,
-        val sender: CommandSender,
+        @Suppress("MemberVisibilityCanBePrivate") val sender: CommandSender,
         val args: Array<out String>
 ) {
 

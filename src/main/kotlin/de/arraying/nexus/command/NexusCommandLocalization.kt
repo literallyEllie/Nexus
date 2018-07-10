@@ -20,7 +20,5 @@ data class NexusCommandLocalization(
         val mustBePlayer: String,
         val mustBeConsole: String,
         val noPermission: String,
-        val noSubCommand: String,
-        val defaultUsage: String,
-        val defaultDescription: String
+        val noSubCommand: String
 )

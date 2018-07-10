@@ -1,7 +1,6 @@
 package de.arraying.nexus.sql.entity
 
 import de.arraying.nexus.Nexus
-import de.arraying.nexus.NexusInstance
 import de.arraying.nexus.sql.SQLQuery
 import de.arraying.nexus.sql.table.SQLTable
 import java.lang.reflect.Field
@@ -23,11 +22,13 @@ import java.lang.reflect.Field
  */
 @Suppress("unused")
 abstract class SQLEntity @JvmOverloads constructor(
+        nexus: Nexus,
         private val id: String,
         private val idColumn: String = SQLTable.Data.ID.identifier
 ) {
 
-    private val sql = NexusInstance.get().sql
+    private val log = nexus.logger
+    private val sql = nexus.sql
     private val table: String?
 
     /**
@@ -39,7 +40,7 @@ abstract class SQLEntity @JvmOverloads constructor(
         }
         val core = coreTables.firstOrNull()
         table = if(core == null) {
-                Nexus.log.severe("Could not find corresponding table for entity $javaClass")
+                log.severe("Could not find corresponding table for entity $javaClass")
                 null
             } else {
                 core.name
@@ -54,15 +55,14 @@ abstract class SQLEntity @JvmOverloads constructor(
         var loaded = false
         if(!SQLQuery(sql, "SELECT * FROM `$table` WHERE `$idColumn` = ?;").fetch({
             if(it.next()) {
-                getFields({
-                    column, field -> field.isAccessible = true; field.set(this, it.getObject(column))
-                })
+                getFields { column, field -> field.isAccessible = true; field.set(this, it.getObject(column))
+                }
                 loaded = true
             } else {
                 loaded = false
             }
         }, id)) {
-            Nexus.log.severe("Could not fetch core data for entity $javaClass")
+            log.severe("Could not fetch core data for entity $javaClass")
             return SQLEntityStatus.ERROR
         }
         return if(loaded) SQLEntityStatus.LOADED else SQLEntityStatus.NONE
@@ -75,15 +75,15 @@ abstract class SQLEntity @JvmOverloads constructor(
         table?: return
         val queryBuilder = StringBuilder("UPDATE `$table` SET")
         val values = ArrayList<Any?>()
-        getFields({
+        getFields {
             column, field -> field.isAccessible = true; values.add(field[this]); queryBuilder.append(" `$column`=?,")
-        })
+        }
         var query = queryBuilder.toString()
         query = if(query.endsWith(",")) query.substring(0, query.lastIndex) else query
         query += " WHERE `$idColumn` = ?;"
         values.add(id)
         if(!SQLQuery(sql, query).execute(*values.toArray())) {
-            Nexus.log.severe("Could not execute update for entity $javaClass")
+            log.severe("Could not execute update for entity $javaClass")
         }
     }
 
@@ -95,14 +95,14 @@ abstract class SQLEntity @JvmOverloads constructor(
         val queryBuilder = StringBuilder("INSERT INTO `$table` VALUES(?,")
         val values = ArrayList<Any?>()
         values.add(id)
-        getFields({
+        getFields {
             _, field -> field.isAccessible = true; values.add(field[this]); queryBuilder.append(" ?,")
-        })
+        }
         var query = queryBuilder.toString()
         query = if(query.endsWith(",")) query.substring(0, query.lastIndex) else query
         query += ");"
         if(!SQLQuery(sql, query).execute(*values.toArray())) {
-            Nexus.log.severe("Could not create for entity $javaClass")
+            log.severe("Could not create for entity $javaClass")
         }
     }
 

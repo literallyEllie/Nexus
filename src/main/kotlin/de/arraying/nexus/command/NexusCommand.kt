@@ -24,10 +24,11 @@ abstract class NexusCommand @JvmOverloads constructor(
         name: String,
         private val perm: String,
         private val target: Target = Target.BOTH,
-        private val meta: NexusCommandMeta = NexusCommandMeta(),
         private val subCommands: List<NexusCommand> = listOf(),
         vararg aliases: String
-): Command(name, meta.description, meta.usage, listOf(*aliases)) {
+): Command(name, "", "", listOf(*aliases)) {
+
+    internal lateinit var locale: NexusCommandLocalization
 
     /**
      * The method that gets invoked when the command is executed.
@@ -42,17 +43,17 @@ abstract class NexusCommand @JvmOverloads constructor(
                 || args == null) {
             throw IllegalStateException("Sender or args are null.")
         }
-        val context = NexusCommandContext(meta.locale, sender, args)
+        val context = NexusCommandContext(locale, sender, args)
         if(target == Target.PLAYER && sender !is Player) {
-            context.reply(meta.locale.mustBePlayer)
+            context.reply(locale.mustBePlayer)
             return true
         }
         if(target == Target.CONSOLE && sender !is ConsoleCommandSender) {
-            context.reply(meta.locale.mustBeConsole)
+            context.reply(locale.mustBeConsole)
             return true
         }
         if(perm.isNotEmpty() && !sender.hasPermission(perm)) {
-            context.reply(meta.locale.noPermission)
+            context.reply(locale.noPermission)
             return true
         }
         if(subCommands.isNotEmpty()
@@ -60,7 +61,7 @@ abstract class NexusCommand @JvmOverloads constructor(
             val command = args[0].toLowerCase()
             val subCommand = subCommands.firstOrNull { it.name == command || it.aliases.contains(command) }
             subCommand?.execute(sender, commandLabel, if(args.size == 1) emptyArray() else args.copyOfRange(1, args.size-1))?:
-                    context.reply(meta.locale.noSubCommand)
+                    context.reply(locale.noSubCommand)
             return true
         }
         onCommand(context)

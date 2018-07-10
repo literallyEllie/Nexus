@@ -1,6 +1,5 @@
 package de.arraying.nexus.gui.impl
 
-import de.arraying.nexus.Nexus
 import de.arraying.nexus.gui.GUI
 import de.arraying.nexus.gui.slot.GUIClick
 import de.arraying.nexus.gui.slot.GUISlot

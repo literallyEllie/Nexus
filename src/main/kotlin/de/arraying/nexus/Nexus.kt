@@ -50,33 +50,34 @@ abstract class Nexus: JavaPlugin() {
      * Enables the plugin.
      */
     override fun onEnable() {
-        NexusInstance.setInstance(this)
-        log = logger
         configuration = NexusConfiguration()
         configure(configuration)
-        log.info("Preparing IO...")
+        logger.info("Preparing IO...")
         try {
             if(dataFolder.mkdirs()) {
-                log.info("Created data folder.")
+                logger.info("Created data folder.")
             }
         } catch(io: IOException) {
-            log.severe("IO exception creating plugin folder.")
+            logger.severe("IO exception creating plugin folder.")
             return
         }
-        log.info("Registering ${configuration.commands.size} commands...")
+        logger.info("Registering ${configuration.commands.size} commands...")
         try {
             val field = Bukkit.getServer().javaClass.getDeclaredField("commandMap")
             field.isAccessible = true
             val commandMap = field.get(Bukkit.getServer()) as CommandMap
+            configuration.commands.forEach {
+                it.locale = configuration.locale
+            }
             commandMap.registerAll(name, configuration.commands as List<Command>?)
         } catch(nsfe: NoSuchFieldException) {
-            log.severe("Could not access the command map; no such field.")
+            logger.severe("Could not access the command map; no such field.")
         } catch(iare: IllegalArgumentException) {
-            log.severe("Illegal argument exception while reflecting.")
+            logger.severe("Illegal argument exception while reflecting.")
         } catch(iace: IllegalAccessException) {
-            log.severe("Illegal access exception while reflecting.")
+            logger.severe("Illegal access exception while reflecting.")
         } catch(npe: NullPointerException) {
-            log.severe("Null pointer exception while reflecting.")
+            logger.severe("Null pointer exception while reflecting.")
         }
         val pluginManager = Bukkit.getPluginManager()
         configuration.listeners.add(GUIListener())
@@ -84,17 +85,17 @@ abstract class Nexus: JavaPlugin() {
             pluginManager.registerEvents(listener, this)
         }
         if(configuration.sql) {
-            log.info("SQL has been specified to be used, setting up...")
-            val credentials = NexusConfigurationHandler.loadConfig(SQLCredentials::class.java, "database")
+            logger.info("SQL has been specified to be used, setting up...")
+            val credentials = NexusConfigurationHandler.loadConfig(this, SQLCredentials::class.java, "database")
             if(credentials == null
                     || !credentials.isValid()) {
-                log.severe("The SQL credentials are invalid or could not be loaded, disabling plugin.")
+                logger.severe("The SQL credentials are invalid or could not be loaded, disabling plugin.")
                 Bukkit.getPluginManager().disablePlugin(this)
                 return
             }
             val sql = SQLHandler(configuration.sqlConfiguration, credentials)
             if(!sql.init()) {
-                log.severe("An SQL error occurred, disabling plugin.")
+                logger.severe("An SQL error occurred, disabling plugin.")
                 Bukkit.getPluginManager().disablePlugin(this)
                 return
             }
@@ -113,12 +114,6 @@ abstract class Nexus: JavaPlugin() {
         } catch(ignored: UninitializedPropertyAccessException) {}
         onShutdown()
         super.onDisable()
-    }
-
-    companion object {
-
-        lateinit var log: Logger
-
     }
 
 }

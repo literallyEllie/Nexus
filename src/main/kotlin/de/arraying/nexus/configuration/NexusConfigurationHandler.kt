@@ -1,7 +1,6 @@
 package de.arraying.nexus.configuration
 
 import de.arraying.nexus.Nexus
-import de.arraying.nexus.NexusInstance
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -31,23 +30,22 @@ object NexusConfigurationHandler {
      * Loads a configuration file, and maps it to an object.
      */
     @JvmOverloads
-    fun <T> loadConfig(clazz: Class<T>, name: String = configDefault): T? {
+    fun <T> loadConfig(nexus: Nexus, clazz: Class<T>, name: String = configDefault): T? {
         if(clazz.constructors.all {
             it.parameterCount != 0
         }) {
             return null
         }
-        val info = getConfig(name)
+        val info = getConfig(nexus, name)
         val new = clazz.newInstance()
         if(info.created) {
-            saveConfig(new, clazz, name)
+            saveConfig(nexus, new, clazz, name)
         } else {
-            handleConfigFields(clazz, {
-                path, field -> field.isAccessible = true
+            handleConfigFields(clazz) { path, field -> field.isAccessible = true
                 if(info.config[path] != null) {
                     field.set(new, info.config[path])
                 }
-            })
+            }
         }
         return new
     }
@@ -56,11 +54,11 @@ object NexusConfigurationHandler {
      * Saves the configuration object to file.
      */
     @JvmOverloads
-    fun <T> saveConfig(instance: T, clazz: Class<T>, name: String = configDefault) {
-        val info = getConfig(name)
-        handleConfigFields(clazz, {
+    fun <T> saveConfig(nexus: Nexus, instance: T, clazz: Class<T>, name: String = configDefault) {
+        val info = getConfig(nexus, name)
+        handleConfigFields(clazz) {
             path, field -> field.isAccessible = true; info.config[path] = field.get(instance)
-        })
+        }
         info.config.save(info.file)
     }
 
@@ -80,11 +78,11 @@ object NexusConfigurationHandler {
     /**
      * Gets the appropriate configuration object.
      */
-    private fun getConfig(name: String) =
-            if(name == configDefault) Information(NexusInstance.get().config, File(NexusInstance.get().dataFolder, "config.yml"), false) else {
-                val file = File(NexusInstance.get().dataFolder, "$name.yml")
+    private fun getConfig(nexus: Nexus, name: String) =
+            if(name == configDefault) Information(nexus.config, File(nexus.dataFolder, "config.yml"), false) else {
+                val file = File(nexus.dataFolder, "$name.yml")
                 val created = if(file.createNewFile()) {
-                        Nexus.log.info("Created the configuration file $name.yml.")
+                        nexus.logger.info("Created the configuration file $name.yml.")
                         true
                     } else {
                         false

@@ -30,9 +30,7 @@ class NexusConfiguration {
             "You must be a player in-game to execute this command.",
             "This command can only be executed by the console.",
             "You do not have the required permission to execute this command.",
-            "A sub-command with that name does not exist.",
-            "/%s",
-            "No description available."
+            "A sub-command with that name does not exist."
     )
 
     /**

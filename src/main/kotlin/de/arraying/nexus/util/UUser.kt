@@ -41,7 +41,7 @@ object UUser {
             return player.uniqueId
         }
         return try {
-            val content = IOUtils.toString(URL("https://api.mojang.com/users/profiles/minecraft/" + name), Charset.forName("utf8"))
+            val content = IOUtils.toString(URL("https://api.mojang.com/users/profiles/minecraft/$name"), Charset.forName("utf8"))
             val uuidRaw = (JsonParser().parse(content) as JsonObject).get("id").toString().replace("\"", "")
             val uuid = pattern.matcher(uuidRaw).replaceAll("$1-$2-$3-$4-$5")
             UUID.fromString(uuid)

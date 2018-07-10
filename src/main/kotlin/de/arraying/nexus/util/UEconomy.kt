@@ -22,7 +22,7 @@ import org.bukkit.OfflinePlayer
 @Suppress("unused", "MemberVisibilityCanPrivate")
 object UEconomy {
 
-    val economy: Economy? = if(Bukkit.getPluginManager().isPluginEnabled("Vault")) Bukkit.getServicesManager().getRegistration(Economy::class.java).provider else null
+    private val economy: Economy? = if(Bukkit.getPluginManager().isPluginEnabled("Vault")) Bukkit.getServicesManager().getRegistration(Economy::class.java).provider else null
 
     /**
      * Gets the balance of a player.
@@ -38,5 +38,10 @@ object UEconomy {
      * Takes money from a player.
      */
     fun take(player: OfflinePlayer, amount: Double) = economy?.withdrawPlayer(player, amount)
+
+    /**
+     * Gets the economy.
+     */
+    fun economy() = economy
 
 }
