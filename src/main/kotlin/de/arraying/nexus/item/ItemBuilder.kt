@@ -2,10 +2,13 @@ package de.arraying.nexus.item
 
 import org.bukkit.ChatColor
 import org.bukkit.Color
+import org.bukkit.DyeColor
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.LeatherArmorMeta
+import org.bukkit.inventory.meta.SkullMeta
+import java.util.*
 
 /**
  * Copyright 2018 Arraying
@@ -61,7 +64,7 @@ class ItemBuilder(
      */
     @JvmOverloads
     fun enchant(enchant: Enchantment, level: Int = 1): ItemBuilder {
-        item.addUnsafeEnchantment(enchant, if(level < 1) 1 else level)
+        item.addUnsafeEnchantment(enchant, if (level < 1) 1 else level)
         return this
     }
 
@@ -69,8 +72,31 @@ class ItemBuilder(
      * Sets the colour of the armour.
      */
     fun colour(colour: Color): ItemBuilder {
-        if(meta is LeatherArmorMeta) {
+        if (meta is LeatherArmorMeta) {
             meta.color = colour
+        }
+        return this
+    }
+
+    /**
+     * Colours the item with a dye color.
+     */
+    fun colour(color: DyeColor): ItemBuilder {
+        if (item.type == Material.WOOL || item.type.name.contains("GLASS")) {
+            item.durability = color.woolData.toShort()
+        } else if (item.type == Material.INK_SACK) {
+            item.durability = color.dyeData.toShort()
+        }
+        return this
+    }
+
+    /**
+     * Sets the item to a head.
+     */
+    fun head(owner: String): ItemBuilder {
+        if (item.type == Material.SKULL_ITEM) {
+            item.durability = 3
+            (meta as SkullMeta).owner = owner
         }
         return this
     }
